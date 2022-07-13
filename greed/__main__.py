@@ -4,11 +4,6 @@ import random
 from game.casting.actor import Actor
 from game.casting.artifact import Artifact
 from game.casting.cast import Cast
-from game.casting.rock import Rock
-from game.casting.lead import Lead
-from game.casting.gem import Gem
-from game.casting.ruby import Ruby
-from game.casting.diamond import Diamond
 
 from game.directing.director import Director
 
@@ -24,19 +19,22 @@ MAX_X = 900
 MAX_Y = 600
 CELL_SIZE = 15
 FONT_SIZE = 15
+DEFAULT_VELOCITY = 1
 COLS = 60
 ROWS = 40
-CAPTION = "Greed: Find Gems, Not Rocks."
+ROCK_VALUE = -1
+GEM_VALUE = 1
+DEFAULT_CAPTION = "Greed:  Score = "
 DATA_PATH = os.path.dirname(os.path.abspath(__file__)) + "/data/messages.txt"
 WHITE = Color(255, 255, 255)
-DEFAULT_ARTIFACTS = 40
+DEFAULT_ARTIFACTS = 30
 
 
 def main():
-    
+
     # create the cast
     cast = Cast()
-    
+
     # create the banner
     banner = Actor()
     banner.set_text("")
@@ -44,10 +42,11 @@ def main():
     banner.set_color(WHITE)
     banner.set_position(Point(CELL_SIZE, 0))
     cast.add_actor("banners", banner)
-    
+
     # create the robot
     x = int(MAX_X / 2)
-    y = int(MAX_Y - (2 * FONT_SIZE))
+    # y = int(MAX_Y / 2)
+    y = MAX_Y - 20
     position = Point(x, y)
 
     robot = Actor()
@@ -56,58 +55,62 @@ def main():
     robot.set_color(WHITE)
     robot.set_position(position)
     cast.add_actor("robots", robot)
-    
+    caption = f"{DEFAULT_CAPTION} {robot.get_score()}"
+
+    # create the Director, KeyboardService and VideoService
+    keyboard_service = KeyboardService(CELL_SIZE)
+    video_service = VideoService(caption, MAX_X, MAX_Y, CELL_SIZE, FRAME_RATE)
+    director = Director(keyboard_service, video_service)
+
     # create the artifacts
     with open(DATA_PATH) as file:
         data = file.read()
         messages = data.splitlines()
 
     for n in range(DEFAULT_ARTIFACTS):
+        # set the icon or image for each artifact
+        if n % 2 == 0:
+            newType = "gem"
+            # text = chr(random.randint(33, 126))
+            # text = "1F48E"  # 💎
+            text = "G"
+        else:
+            newType = "stone"
+            # text = chr(random.randint(33, 126))
+            # "1FAA8"  🪨
+            text = "S"
+
         message = messages[n]
 
+        # set the start position for each artifact
         x = random.randint(1, COLS - 1)
-        y = random.randint(1, ROWS - 1)
+        y = -1 * random.randint(1, ROWS - 1)
+        # y = 2
         position = Point(x, y)
         position = position.scale(CELL_SIZE)
 
+        # set the color for each artifact
         r = random.randint(0, 255)
         g = random.randint(0, 255)
         b = random.randint(0, 255)
         color = Color(r, g, b)
 
-        chance = random.randint(0, 1000)
-        if 0 <= chance < 250:
-            # Spawn in Gem.
-            artifact = Gem()
-            artifact.set_text('*')
-        elif 250 <= chance < 500:
-            # Spawn in Rock.
-            artifact = Rock()
-            artifact.set_text('0')
-        elif 500 <= chance < 625:
-            # Spawn in Ruby.
-            artifact = Ruby()
-            artifact.set_text('%')
-        elif 625 <= chance < 750:
-            # Spawn in Lead.
-            artifact = Lead()
-            artifact.set_text('!!')
-        elif 750 <= chance <= 1000:
-            # Spawn in Diamond.
-            artifact = Diamond()
-            artifact.set_text('&')
-
+        # create the artifact & set the attributes
+        artifact = Artifact()
+        artifact.set_text(text)
         artifact.set_font_size(FONT_SIZE)
         artifact.set_color(color)
+        artifact.set_type(newType)
         artifact.set_position(position)
         artifact.set_message(message)
         cast.add_actor("artifacts", artifact)
-        
-    
+
+        ks = keyboard_service
+        velocity = ks.get_direction("artifact")
+        artifact.set_velocity(velocity)
+
+
     # start the game
-    keyboard_service = KeyboardService(CELL_SIZE)
-    video_service = VideoService(CAPTION, MAX_X, MAX_Y, CELL_SIZE, FRAME_RATE)
-    director = Director(keyboard_service, video_service)
     director.start_game(cast)
 
 
