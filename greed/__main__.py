@@ -17,8 +17,9 @@ CELL_SIZE = 15
 FONT_SIZE = 15
 COLS = 60
 ROWS = 40
-CAPTION = "Greed"
+CAPTION = "Greed Game"
 WHITE = Color(255, 255, 255)
+DEFAULT_ARTIFACTS = 40
 
 def main():
     
@@ -27,29 +28,29 @@ def main():
     
     # create the banner
     banner = Actor()
-    banner.set_font_size(FONT_SIZE)
+    banner.set_text("")
+    banner.set_font_size(FONT_SIZE + 10)
     banner.set_color(WHITE)
     banner.set_position(Point(CELL_SIZE, 0))
     cast.add_actor("banners", banner)
     
-    # create the player
+    # create the robot
     x = int(MAX_X / 2)
-    y = int(MAX_Y - 15)
+    y = MAX_Y - CELL_SIZE
     position = Point(x, y)
 
-    player = Actor()
-    player.set_text("#")
-    player.set_font_size(FONT_SIZE)
-    player.set_color(WHITE)
-    player.set_position(position)
-    cast.add_actor("players", player)
+    robot = Actor()
+    robot.set_text("#")
+    robot.set_font_size(FONT_SIZE)
+    robot.set_color(WHITE)
+    robot.set_position(position)
+    cast.add_actor("robots", robot)
 
     # start the game
     keyboard_service = KeyboardService(CELL_SIZE)
     video_service = VideoService(CAPTION, MAX_X, MAX_Y, CELL_SIZE, FRAME_RATE)
-    director = Director(keyboard_service, video_service)
-    director.start_game(cast)
-
+    director = Director(keyboard_service, video_service, DEFAULT_ARTIFACTS, COLS, ROWS, FONT_SIZE, CELL_SIZE)
+    director.start_game(cast)    
 
 if __name__ == "__main__":
     main()
