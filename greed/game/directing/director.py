@@ -1,46 +1,92 @@
-import pyray
+from game.casting.artifact import Artifact
 from game.shared.point import Point
 
 
-class KeyboardService:
-    """Detects player input.
-    The responsibility of a KeyboardService is to detect player key presses 
-    and translate them into a point representing a direction.
+import random
+
+
+class Director:
+    """A person who directs the game. 
+    
+    The responsibility of a Director is to control the sequence of play.
     Attributes:
-        cell_size (int): For scaling directional input to a grid.
+        _keyboard_service (KeyboardService): For getting directional input.
+        _video_service (VideoService): For providing video output.
     """
 
-    def __init__(self, cell_size=1):
-        """Constructs a new KeyboardService using the specified cell size.
+    def __init__(self, keyboard_service, video_service):
+        """Constructs a new Director using the specified keyboard and video services.
+        
         Args:
-            cell_size (int): The size of a cell in the display grid.
+            keyboard_service (KeyboardService): An instance of KeyboardService.
+            video_service (VideoService): An instance of VideoService.
         """
-        self._cell_size = cell_size
-
-    def get_direction(self, type="robot"):
-        """Gets the selected direction based on the currently pressed keys.
-        Returns:
-            Point: The selected direction.
+        self._keyboard_service = keyboard_service
+        self._video_service = video_service
+        self._score = 0
+        
+    def start_game(self, cast):
+        """Starts the game using the given cast. Runs the main game loop.
+        Args:
+            cast (Cast): The cast of actors.
         """
-        dx = 0
-        dy = 0
+        self._video_service.open_window()
+        while self._video_service.is_window_open():
+            self._get_inputs(cast)
+            self._do_updates(cast)
+            self._do_outputs(cast)
+        self._video_service.close_window()
 
-        if type == "robot":
-            if pyray.is_key_down(pyray.KEY_LEFT):
-                dx = -1
+    def _get_inputs(self, cast):
+        """Gets directional input from the keyboard and applies it to the robot.
+        
+        Args:
+            cast (Cast): The cast of actors.
+        """
+        robot = cast.get_first_actor("robots")
+        cPos = robot.get_position().get_y()
+        max_y = self._video_service.get_height()
+        velocity = self._keyboard_service.get_direction(cPos, max_y)
+        robot.set_velocity(velocity)        
 
-            if pyray.is_key_down(pyray.KEY_RIGHT):
-                dx = 1
+    def _do_updates(self, cast):
+        """Updates the robot's position and resolves any collisions with artifacts.
+        
+        Args:
+            cast (Cast): The cast of actors.
+        """
+        banner = cast.get_first_actor("banners")
+        robot = cast.get_first_actor("robots")
+        artifacts = cast.get_actors("artifacts")
 
-            if pyray.is_key_down(pyray.KEY_UP):
-                dy = -1
+        banner.set_text("")
+        max_x = self._video_service.get_width()
+        max_y = self._video_service.get_height()
+        robot.move_next(max_x, max_y)
+        
+        # new codes
+        speed = Point(0,5)
+        if len(artifacts) > 0:
+            artifacts[random.randint(0, len(artifacts) - 1)].set_velocity(speed)            
+        
+        for artifact in artifacts:
+            artifact.move_next(max_x, max_y)
+            if robot.get_position().equals(artifact.get_position()):
+                self._score = artifact.get_score_factor(self._score, artifact.get_text())
+                cast.remove_actor("artifacts", artifact) 
+                artifact = Artifact.random_artifact()
+                cast.add_actor("artifacts", artifact)
+    
+        banner.set_text(f'Score: {self._score}')
+        #new codes ends
 
-            if pyray.is_key_down(pyray.KEY_DOWN):
-                dy = 1
-        else:
-            dy = 1
-
-        direction = Point(dx, dy)
-        direction = direction.scale(self._cell_size)
-
-        return direction
+    def _do_outputs(self, cast):
+        """Draws the actors on the screen.
+        
+        Args:
+            cast (Cast): The cast of actors.
+        """
+        self._video_service.clear_buffer()
+        actors = cast.get_all_actors()
+        self._video_service.draw_actors(actors)
+        self._video_service.flush_buffer()

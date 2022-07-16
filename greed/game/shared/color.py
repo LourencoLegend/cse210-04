@@ -1,62 +1,32 @@
-class Point:
-    """A distance from a relative origin (0, 0).
-    The responsibility of Point is to hold and provide information about
-    itself. Point has a few convenience methods for adding, scaling, and
-    comparing them.
+class Color:
+    """A color.
+    The responsibility of Color is to hold and provide information about itself. Color has a few 
+    convenience methods for comparing them and converting to a tuple.
     Attributes:
-        _x (integer): The horizontal distance from the origin.
-        _y (integer): The vertical distance from the origin.
+        _red (int): The red value.
+        _green (int): The green value.
+        _blue (int): The blue value.
+        _alpha (int): The alpha or opacity.
     """
-
-    def __init__(self, x, y):
-        """Constructs a new Point using the specified x and y values.
+    
+    def __init__(self, red, green, blue, alpha = 255):
+        """Constructs a new Color using the specified red, green, blue and alpha values. The alpha 
+        value is the color's opacity.
+        
         Args:
-            x (int): The specified x value.
-            y (int): The specified y value.
+            red (int): A red value.
+            green (int): A green value.
+            blue (int): A blue value.
+            alpha (int): An alpha or opacity.
         """
-        self._x = x
-        self._y = y
+        self._red = red
+        self._green = green
+        self._blue = blue 
+        self._alpha = alpha
 
-    def add(self, other):
-        """Gets a new point that is the sum of this and the given one.
-        Args:
-            other (Point): The Point to add.
+    def to_tuple(self):
+        """Gets the color as a tuple of four values (red, green, blue, alpha).
         Returns:
-            Point: A new Point that is the sum.
+            Tuple(int, int, int, int): The color as a tuple.
         """
-        x = self._x + other.get_x()
-        y = self._y + other.get_y()
-        return Point(x, y)
-
-    def equals(self, other):
-        """Whether or not this Point is equal to the given one.
-        Args:
-            other (Point): The Point to compare.
-        Returns: 
-            boolean: True if both x and y are equal; false if otherwise.
-        """
-        return self._x == other.get_x() and self._y == other.get_y()
-
-    def get_x(self):
-        """Gets the horizontal distance.
-        Returns:
-            integer: The horizontal distance.
-        """
-        return self._x
-
-    def get_y(self):
-        """Gets the vertical distance.
-        Returns:
-            integer: The vertical distance.
-        """
-        return self._y
-
-    def scale(self, factor):
-        """
-        Scales the point by the provided factor.
-        Args:
-            factor (int): The amount to scale.
-        Returns:
-            Point: A new Point that is scaled.
-        """
-        return Point(self._x * factor, self._y * factor)
+        return (self._red, self._green, self._blue, self._alpha)   
