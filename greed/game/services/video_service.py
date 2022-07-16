@@ -2,11 +2,12 @@ import pyray
 
 
 class VideoService:
-    """Outputs the game state. The responsibility of the class of objects is to draw the game state 
-    on the screen. 
+    """Outputs the game state. The responsibility of the class of objects is to
+    draw the game state on the screen. 
     """
 
-    def __init__(self, caption, width, height, cell_size, frame_rate, debug = False):
+    def __init__(self, caption, width, height,
+                 cell_size, frame_rate, debug=False):
         """Constructs a new VideoService using the specified debug mode.
         
         Args:
@@ -16,7 +17,7 @@ class VideoService:
         self._width = width
         self._height = height
         self._cell_size = cell_size
-        self._frame_rate = frame_rate+10
+        self._frame_rate = frame_rate
         self._debug = debug
 
     def close_window(self):
@@ -24,8 +25,8 @@ class VideoService:
         pyray.close_window()
 
     def clear_buffer(self):
-        """Clears the buffer in preparation for the next rendering. This method should be called at
-        the beginning of the game's output phase.
+        """Clears the buffer in preparation for the next rendering. This method
+        should be called at the beginning of the game's output phase.
         """
         pyray.begin_drawing()
         pyray.clear_background(pyray.BLACK)
@@ -36,14 +37,14 @@ class VideoService:
         """Draws the given actor's text on the screen.
         Args:
             actor (Actor): The actor to draw.
-        """ 
+        """
         text = actor.get_text()
         x = actor.get_position().get_x()
         y = actor.get_position().get_y()
         font_size = actor.get_font_size()
         color = actor.get_color().to_tuple()
         pyray.draw_text(text, x, y, font_size, color)
-        
+
     def draw_actors(self, actors):
         """Draws the text for the given list of actors on the screen.
         Args:
@@ -53,8 +54,8 @@ class VideoService:
             self.draw_actor(actor)
     
     def flush_buffer(self):
-        """Copies the buffer contents to the screen. This method should be called at the end of
-        the game's output phase.
+        """Copies the buffer contents to the screen. This method should be
+        called at the end of the game's output phase.
         """ 
         pyray.end_drawing()
 
@@ -103,3 +104,10 @@ class VideoService:
             pyray.draw_line(0, y, self._width, y, pyray.GRAY)
         for x in range(0, self._width, self._cell_size):
             pyray.draw_line(x, 0, x, self._height, pyray.GRAY)
+
+    def set_caption(self, caption):
+        """Sets the caption of the window.
+        Args:
+            caption (string): The new caption of the window.
+        """
+        self._caption = caption

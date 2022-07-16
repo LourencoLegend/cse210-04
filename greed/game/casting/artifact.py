@@ -1,44 +1,72 @@
-import random
-from game.shared.point import Point
-from game.shared.color import Color
-from game.casting.actor import Actor
-
-### ADD PARAMETERS
-ROCK_TEXT = 'o'
-GEM_TEXT = '*'
-GEM_POINTS = 1
-ROCK_POINTS = -1
-###
-
-class Artifact(Actor):
-    """
-    An item of cultural or historical interest. 
-    
-    The responsibility of an Artifact is to provide a message about itself.
+class Cast:
+    """A collection of actors.
+    The responsibility of a cast is to keep track of a collection of actors. It has methods for 
+    adding, removing and getting them by a group name.
     Attributes:
-        _message (string): A short description about the artifact.
+        _actors (dict): A dictionary of actors { key: group_name, value: a list of actors }
     """
-    def __init__(self, cols, rows, cell_size, font_size):
-        super().__init__()
 
-        x = random.randint(1, cols - 1)
-        y = random.randint(1, rows - 1)
-        position = Point(x, y)
-        position = position.scale(cell_size)
-
-        r = random.randint(0, 255)
-        g = random.randint(0, 255)
-        b = random.randint(0, 255)
-        color = Color(r, g, b)
+    def __init__(self):
+        """Constructs a new Actor."""
+        self._actors = {}
         
-        self.set_text(random.choice([ROCK_TEXT, GEM_TEXT]))
-        self.set_font_size(font_size)
-        self.set_color(color)
-        self.set_position(position)
+    def add_actor(self, group, actor):
+        """Adds an actor to the given group.
+        
+        Args:
+            group (string): The name of the group.
+            actor (Actor): The actor to add.
+        """
+        if not group in self._actors.keys():
+            self._actors[group] = []
+            
+        if not actor in self._actors[group]:
+            self._actors[group].append(actor)
 
-        ### ADD POINTS
-        if self._text is ROCK_TEXT:
-            self.set_points(ROCK_POINTS)
-        if self._text is GEM_TEXT:
-            self.set_points(GEM_POINTS)
-        ###
+    def get_actors(self, group):
+        """Gets the actors in the given group.
+        
+        Args:
+            group (string): The name of the group.
+        Returns:
+            List: The actors in the group.
+        """
+        results = []
+        if group in self._actors.keys():
+            results = self._actors[group].copy()
+        return results
+    
+    def get_all_actors(self):
+        """Gets all of the actors in the cast.
+        
+        Returns:
+            List: All of the actors in the cast.
+        """
+        results = []
+        for group in self._actors:
+            results.extend(self._actors[group])
+        return results
+
+    def get_first_actor(self, group):
+        """Gets the first actor in the given group.
+        
+        Args:
+            group (string): The name of the group.
+            
+        Returns:
+            List: The first actor in the group.
+        """
+        result = None
+        if group in self._actors.keys():
+            result = self._actors[group][0]
+        return result
+
+    def remove_actor(self, group, actor):
+        """Removes an actor from the given group.
+        
+        Args:
+            group (string): The name of the group.
+            actor (Actor): The actor to remove.
+        """
+        if group in self._actors:
+            self._actors[group].remove(actor)
