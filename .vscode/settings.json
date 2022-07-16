@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./greed/game",
+        "./greed/game"
+    ]
+}
